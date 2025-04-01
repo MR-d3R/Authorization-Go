@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8101:8101"
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - my_shared_network
+
+  # Здесь можно добавить другие сервисы, такие как база данных, если необходимо
+  # web:
+  #   image: web-service
+  #   container_name: web-service
+  #   ports:
+  #     - "8000:8000"
+  #   networks:
+  #     - backend
+
+networks:
+  my_shared_network:
+    external: true

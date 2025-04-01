@@ -1,0 +1,5 @@
+{
+    "service_name": "Authorization service",
+    "server_port": 8101,
+    "log_level": "debug"
+}

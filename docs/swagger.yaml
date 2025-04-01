@@ -1,0 +1,222 @@
+basePath: /
+definitions:
+  models.ErrorResponse:
+    properties:
+      error:
+        example: Описание ошибки
+        type: string
+    type: object
+  models.Message:
+    description: Сообщение в ответе API
+    properties:
+      message:
+        description: Текст сообщения
+        example: Успешный выход из системы
+        type: string
+    type: object
+  models.TokenResponse:
+    description: Ответ с токеном доступа
+    properties:
+      access_token:
+        description: JWT токен доступа
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      token_type:
+        description: Тип токена (обычно "bearer")
+        example: bearer
+        type: string
+    type: object
+  models.TokenVerifyResponse:
+    description: Ответ на проверку токена
+    properties:
+      agency_id:
+        description: ID агентства
+        example: 42
+        type: integer
+      username:
+        description: Имя пользователя
+        example: user123
+        type: string
+      valid:
+        description: Флаг валидности токена
+        example: true
+        type: boolean
+    type: object
+  models.User:
+    description: Данные пользователя для аутентификации
+    properties:
+      password:
+        description: Пароль пользователя
+        example: pass123!!
+        type: string
+      username:
+        description: Логин пользователя
+        example: user123
+        type: string
+    required:
+    - password
+    - username
+    type: object
+info:
+  contact: {}
+  description: API для аутентификации и управления токенами
+  title: Auth Service API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Выполняет вход в систему и возвращает JWT токен
+      parameters:
+      - description: Учетные данные пользователя
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Аутентификация пользователя
+      tags:
+      - auth
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Выполняет выход пользователя и удаляет токен
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Message'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Выход из системы
+      tags:
+      - auth
+  /token/create:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Создает токен доступа в формате JWT
+      parameters:
+      - description: Имя пользователя
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Пароль
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Создание токена (JWT)
+      tags:
+      - auth
+  /token/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Обновляет JWT токен
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Обновление токена
+      tags:
+      - auth
+  /token/verify:
+    post:
+      consumes:
+      - application/json
+      description: Проверяет валидность JWT токена
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TokenVerifyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Проверка токена
+      tags:
+      - auth
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
